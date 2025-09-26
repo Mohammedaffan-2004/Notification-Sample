@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, X } from "lucide-react";
 
@@ -22,19 +22,27 @@ const clearAllTimeouts = () => {
   sleep.timeouts = [];
 };
 
-// Reusable icon component
+// Animated Notification Icon (restored from your original UI)
 const NotificationIcon = ({ type }) => {
   const color = type === NOTIFICATION_TYPES.SUCCESS ? "bg-green-500" : "bg-red-500";
-  const IconComponent = type === NOTIFICATION_TYPES.SUCCESS ? Check : X;
 
   return (
-    <div className={`w-10 h-10 rounded-full ${color} flex items-center justify-center`}>
-      <IconComponent className="h-6 w-6 text-white" />
-    </div>
+    <motion.div
+      className={`w-8 h-8 rounded-full ${color} flex items-center justify-center`}
+      initial={{ opacity: 0, scale: 0.6, rotate: type === 'error' ? -45 : 0 }}
+      animate={{ opacity: 1, scale: 1, rotate: 0 }}
+      transition={{ delay: 0.4, duration: 0.3, ease: 'easeOut' }}
+    >
+      {type === NOTIFICATION_TYPES.SUCCESS ? (
+        <Check className="h-5 w-5 text-white" />
+      ) : (
+        <X className="h-5 w-5 text-white" />
+      )}
+    </motion.div>
   );
 };
 
-// Reusable message component
+// Message component
 const NotificationMessage = ({ message, textColor }) => (
   <div className="w-full pl-12">
     <p className={`${textColor} text-center font-medium`}>{message}</p>
@@ -48,7 +56,6 @@ const NotificationPopup = () => {
   const [notificationType, setNotificationType] = useState(NOTIFICATION_TYPES.SUCCESS);
   const [customMessage, setCustomMessage] = useState(null);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => clearAllTimeouts();
   }, []);
@@ -72,13 +79,13 @@ const NotificationPopup = () => {
 
   const { message, color, textColor, timerColor } = getNotificationDetails();
 
-  const triggerNotification = async (type = NOTIFICATION_TYPES.SUCCESS, message = null) => {
+  const triggerNotification = async (type = NOTIFICATION_TYPES.SUCCESS, msg = null) => {
     clearAllTimeouts();
     setIsVisible(false);
     setIsExpanded(false);
     setShowTimer(false);
     setNotificationType(type);
-    setCustomMessage(message);
+    setCustomMessage(msg);
 
     await sleep(100);
     setIsVisible(true);
@@ -101,7 +108,7 @@ const NotificationPopup = () => {
     clearAllTimeouts();
     setShowTimer(false);
     setIsExpanded(false);
-    setIsVisible(false);
+    setTimeout(() => setIsVisible(false), 300); // Allow collapse animation
   };
 
   return (
@@ -147,7 +154,7 @@ const NotificationPopup = () => {
               {isExpanded && (
                 <button
                   onClick={dismissNotification}
-                  className="absolute top-2 right-2 text-gray-400 hover:text-gray-700"
+                  className="absolute top-2 right-2 text-gray-400 hover:text-gray-700 z-10"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -160,9 +167,9 @@ const NotificationPopup = () => {
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.2, duration: 0.3 }}
                 >
-                  {/* Status icon */}
+                  {/* Animated icon */}
                   <motion.div
-                    className={`absolute left-4 w-8 h-8 rounded-full ${color} flex items-center justify-center`}
+                    className="absolute left-4 w-8 h-8 flex items-center justify-center"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.3, duration: 0.3 }}
